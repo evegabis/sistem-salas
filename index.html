@@ -2,65 +2,62 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Sistema Escolar - Clube da Ciência</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Escolar</title>
 
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f4f4f4;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f2f2f2;
 }
 
 /* CABEÇALHO */
-header {
-  background: #6b0f1a;
-  color: white;
-  text-align: center;
-  padding: 20px;
+header{
+  background:linear-gradient(135deg,#6b0f1a,#3a3a3a);
+  color:white;
+  text-align:center;
+  padding:20px;
 }
 
-/* CONTAINER */
-.container {
-  padding: 20px;
-}
+header h1{margin:0;font-size:20px;}
+header h2{margin:5px 0;font-size:16px;}
+header p{margin:0;font-size:13px;opacity:0.9;}
 
 /* CARD */
-.card {
-  background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.card{
+  background:white;
+  margin:15px;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
 
 /* BOTÃO */
-button {
-  background: #6b0f1a;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
+button{
+  width:100%;
+  padding:10px;
+  background:#6b0f1a;
+  color:white;
+  border:none;
+  border-radius:8px;
 }
 
-button:hover {
-  background: #4e0b13;
+/* OPÇÕES */
+.opcao{
+  padding:10px;
+  margin:5px 0;
+  border-radius:8px;
+  text-align:center;
+  cursor:pointer;
+  font-weight:bold;
 }
-
-/* INPUT */
-input, select {
-  width: 100%;
-  padding: 8px;
-  margin: 5px 0 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
+.ok{background:#c8f7c5;}
+.mid{background:#eee;}
+.bad{background:#f8c6c6;}
 
 /* ADMIN */
-#adminPanel {
-  display: none;
-  border: 2px solid #6b0f1a;
-}
+#adminPanel{display:none;}
 </style>
 </head>
 
@@ -68,169 +65,119 @@ input, select {
 
 <header>
 <h1>Colégio Arlinda Ferreira Crepini</h1>
-<p>Projeto Meninas Clube da Ciência</p>
+<h2>Projeto Meninas Clube das Meninas</h2>
 <p>Sistema de Avaliação Escolar</p>
 </header>
 
-<div class="container">
-
-<!-- LOGIN ADMIN -->
-<div class="card">
-<h2>Acesso Administrador</h2>
-<input type="password" id="senha" placeholder="Digite a senha">
-<button onclick="login()">Entrar</button>
-<p id="erro" style="color:red;"></p>
-</div>
-
 <!-- AVALIAÇÃO -->
 <div class="card">
-<h2>Avaliação Diária</h2>
+<h3>Avaliação Diária</h3>
 
-<label>Nome da avaliadora:</label>
-<input type="text" id="func">
+<select id="turma">
+  <option>6A</option><option>6B</option><option>6C</option><option>6D</option>
+  <option>7A</option><option>7B</option><option>7C</option><option>7D</option>
+  <option>8A</option><option>8B</option><option>8C</option><option>8D</option>
+  <option>9A</option><option>9B</option><option>9C</option>
+  <option>1A</option><option>1B</option><option>1C</option>
+  <option>2A</option><option>2B</option><option>2C</option>
+  <option>3A</option><option>3B</option><option>3C</option>
+</select>
 
-<label>Turma:</label>
-<select id="turma"></select>
+<h4>Lixo na sala</h4>
+<div class="opcao ok" onclick="lixo=2">Excelente (+2)</div>
+<div class="opcao mid" onclick="lixo=0">Regular (0)</div>
+<div class="opcao bad" onclick="lixo=-2">Ruim (-2)</div>
 
-<label>Lixo (-2 a +2)</label>
-<input type="number" id="lixo" value="0">
+<h4>Carteiras organizadas</h4>
+<div class="opcao ok" onclick="carteiras=3">Excelente (+3)</div>
+<div class="opcao mid" onclick="carteiras=0">Regular (0)</div>
 
-<label>Carteiras (+3)</label>
-<input type="number" id="carteiras" value="0">
+<button onclick="salvar()">Salvar Avaliação</button>
+</div>
 
-<label>Quadro (+2)</label>
-<input type="number" id="quadro" value="0">
-
-<label>Varrida (+3)</label>
-<input type="number" id="varrida" value="0">
-
-<button onclick="salvar()">Salvar Pontuação</button>
+<!-- ADMIN LOGIN -->
+<div class="card">
+<h3>Acesso Administrador</h3>
+<input type="password" id="senha" placeholder="Senha">
+<button onclick="login()">Entrar</button>
 </div>
 
 <!-- ADMIN PANEL -->
 <div class="card" id="adminPanel">
-<h2>Painel do Administrador</h2>
-
-<button onclick="mostrarRelatorios()">Gerar Relatórios</button>
-
-<div id="relatorios"></div>
+<h3>Painel Admin</h3>
+<button onclick="relatorio()">Ver Relatório Geral</button>
+<div id="resultado"></div>
 </div>
 
-</div>
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<script>
+/* 🔴 COLOQUE SEU CONFIG DO FIREBASE AQUI */
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH",
+  projectId: "SEU_PROJECT",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP"
+};
 
-let dados = JSON.parse(localStorage.getItem("dados")) || [];
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-/* TURMAS */
-let turmas = [
-"6A","6B","6C","6D",
-"7A","7B","7C","7D",
-"8A","8B","8C","8D",
-"9A","9B","9C",
-"1A","1B","1C",
-"2A","2B","2C",
-"3A","3B","3C"
-];
+let lixo = 0;
+let carteiras = 0;
 
-let sel = document.getElementById("turma");
-turmas.forEach(t=>{
-  let o=document.createElement("option");
-  o.value=t;
-  o.innerHTML=t;
-  sel.appendChild(o);
-});
+/* SALVAR NO BANCO */
+window.salvar = async function(){
 
-/* SALVAR */
-function salvar(){
-  let pontos =
-    Number(lixo.value) +
-    Number(carteiras.value) +
-    Number(quadro.value) +
-    Number(varrida.value);
+  let total = lixo + carteiras;
 
-  let registro = {
-    turma: turma.value,
-    func: func.value,
-    pontos: pontos,
-    data: new Date().toISOString()
-  };
+  await addDoc(collection(db,"avaliacoes"),{
+    turma: document.getElementById("turma").value,
+    pontos: total,
+    data: new Date()
+  });
 
-  dados.push(registro);
-  localStorage.setItem("dados", JSON.stringify(dados));
-
-  alert("Salvo!");
+  alert("Avaliação salva na nuvem!");
 }
 
 /* LOGIN ADMIN */
-function login(){
+window.login = function(){
   let senha = document.getElementById("senha").value;
 
   if(senha === "2312"){
-    document.getElementById("adminPanel").style.display = "block";
-    document.getElementById("erro").innerText = "";
+    document.getElementById("adminPanel").style.display="block";
   } else {
-    document.getElementById("erro").innerText = "Senha incorreta!";
+    alert("Senha incorreta!");
   }
 }
 
-/* WEEK KEY */
-function getWeek(d){
-  let date = new Date(d);
-  let onejan = new Date(date.getFullYear(),0,1);
-  return Math.ceil((((date - onejan) / 86400000) + onejan.getDay()+1)/7);
-}
+/* RELATÓRIO */
+window.relatorio = async function(){
 
-/* MONTH KEY */
-function getMonth(d){
-  return new Date(d).getMonth()+1;
-}
-
-/* RELATÓRIOS */
-function mostrarRelatorios(){
+  let snap = await getDocs(collection(db,"avaliacoes"));
 
   let total = 0;
-  let porMes = {};
-  let porSemana = {};
   let porTurma = {};
 
-  dados.forEach(d=>{
-    let date = new Date(d.data);
-    let mes = getMonth(date);
-    let semana = getWeek(date);
+  snap.forEach(doc=>{
+    let d = doc.data();
 
     total += d.pontos;
-
-    // mês
-    porMes[mes] = (porMes[mes] || 0) + d.pontos;
-
-    // semana
-    porSemana[semana] = (porSemana[semana] || 0) + d.pontos;
-
-    // turma
     porTurma[d.turma] = (porTurma[d.turma] || 0) + d.pontos;
   });
 
-  let html = "";
+  let html = `<h4>Total geral: ${total}</h4>`;
 
-  html += `<h3>Total Geral do Projeto</h3><p>${total} pontos</p>`;
-
-  html += `<h3>Por Mês</h3>`;
-  for(let m in porMes){
-    html += `<p>Mês ${m}: ${porMes[m]} pontos</p>`;
-  }
-
-  html += `<h3>Por Semana</h3>`;
-  for(let s in porSemana){
-    html += `<p>Semana ${s}: ${porSemana[s]} pontos</p>`;
-  }
-
-  html += `<h3>Ranking por Turma</h3>`;
   for(let t in porTurma){
-    html += `<p>${t}: ${porTurma[t]} pontos</p>`;
+    html += `<p>${t} → ${porTurma[t]} pontos</p>`;
   }
 
-  document.getElementById("relatorios").innerHTML = html;
+  document.getElementById("resultado").innerHTML = html;
 }
 
 </script>
