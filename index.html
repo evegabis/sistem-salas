@@ -1,0 +1,216 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Organização</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-green-50 min-h-screen p-6">
+
+<div class="max-w-6xl mx-auto space-y-6">
+
+  <div class="bg-white rounded-3xl shadow-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <p class="text-sm text-gray-500">Sistema Escolar</p>
+      </div>
+
+      <button
+        onclick="toggleAdmin()"
+        class="bg-green-700 text-white px-4 py-2 rounded-2xl"
+      >
+        Painel Admin
+      </button>
+    </div>
+
+    <h1 class="text-3xl font-bold text-green-800 mb-2">
+      Sistema de Organização das Salas
+    </h1>
+
+    <p class="text-gray-600">
+      Avaliação diária das salas durante o trimestre.
+    </p>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+
+    <div class="bg-white rounded-3xl shadow-lg p-6">
+      <h2 class="text-2xl font-semibold text-green-700 mb-4">
+        Avaliação Diária
+      </h2>
+
+      <div class="space-y-4">
+
+        <select id="turma" class="w-full border rounded-2xl p-3">
+          <option>1º A</option>
+          <option>1º B</option>
+          <option>1º C</option>
+          <option>2º A</option>
+          <option>2º B</option>
+          <option>3º A</option>
+          <option>9º Ano</option>
+        </select>
+
+        <input
+          id="mesa"
+          type="number"
+          placeholder="Nota da mesa"
+          class="w-full border rounded-2xl p-3"
+        >
+
+        <input
+          id="chao"
+          type="number"
+          placeholder="Nota do chão"
+          class="w-full border rounded-2xl p-3"
+        >
+
+        <input
+          id="parede"
+          type="number"
+          placeholder="Nota da parede"
+          class="w-full border rounded-2xl p-3"
+        >
+
+        <textarea
+          id="obs"
+          placeholder="Observações"
+          class="w-full border rounded-2xl p-3"
+        ></textarea>
+
+        <button
+          onclick="salvar()"
+          class="w-full bg-green-700 text-white py-3 rounded-2xl"
+        >
+          Salvar Avaliação
+        </button>
+
+      </div>
+    </div>
+
+    <div
+      id="painel"
+      class="bg-white rounded-3xl shadow-lg p-6 hidden"
+    >
+      <h2 class="text-2xl font-semibold text-green-700 mb-4">
+        Ranking Geral
+      </h2>
+
+      <div id="ranking" class="space-y-4"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+let admin = false;
+
+function toggleAdmin() {
+  admin = !admin;
+
+  const painel = document.getElementById("painel");
+
+  if(admin){
+    painel.classList.remove("hidden");
+  } else {
+    painel.classList.add("hidden");
+  }
+}
+
+function salvar(){
+
+  const turma = document.getElementById("turma").value;
+  const mesa = Number(document.getElementById("mesa").value);
+  const chao = Number(document.getElementById("chao").value);
+  const parede = Number(document.getElementById("parede").value);
+
+  const media = ((mesa + chao + parede) / 3).toFixed(1);
+
+  const dados = JSON.parse(localStorage.getItem("avaliacoes")) || [];
+
+  dados.push({
+    turma,
+    media
+  });
+
+  localStorage.setItem(
+    "avaliacoes",
+    JSON.stringify(dados)
+  );
+
+  atualizarRanking();
+
+  alert("Avaliação salva!");
+}
+
+function atualizarRanking(){
+
+  const dados =
+    JSON.parse(localStorage.getItem("avaliacoes")) || [];
+
+  const ranking = {};
+
+  dados.forEach(item => {
+
+    if(!ranking[item.turma]){
+      ranking[item.turma] = [];
+    }
+
+    ranking[item.turma].push(Number(item.media));
+
+  });
+
+  const resultado = Object.entries(ranking).map(([turma, notas]) => {
+
+    const media =
+      notas.reduce((a,b)=>a+b,0) / notas.length;
+
+    return {
+      turma,
+      media: media.toFixed(1)
+    };
+
+  });
+
+  resultado.sort((a,b)=>b.media-a.media);
+
+  const div = document.getElementById("ranking");
+
+  div.innerHTML = "";
+
+  resultado.forEach((item,index)=>{
+
+    div.innerHTML += `
+      <div class="border rounded-2xl p-4 flex justify-between">
+        <div>
+          <p class="font-bold">
+            ${index + 1}º Lugar - ${item.turma}
+          </p>
+
+          <p class="text-gray-500">
+            Média: ${item.media}
+          </p>
+        </div>
+
+        <div class="bg-green-100 px-4 py-2 rounded-2xl">
+          ${index === 0 ? 10 : 8} pts
+        </div>
+      </div>
+    `;
+
+  });
+
+}
+
+atualizarRanking();
+
+</script>
+
+</body>
+</html>
+```
