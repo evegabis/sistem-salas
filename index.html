@@ -45,16 +45,25 @@ button{
 
 /* OPÇÕES */
 .opcao{
-  padding:10px;
-  margin:5px 0;
+  padding:12px;
+  margin:6px 0;
   border-radius:8px;
   text-align:center;
   cursor:pointer;
   font-weight:bold;
+  transition:0.2s;
 }
+
 .ok{background:#c8f7c5;}
 .mid{background:#eee;}
 .bad{background:#f8c6c6;}
+
+/* SELECIONADO */
+.selecionado{
+  border:3px solid #6b0f1a;
+  transform:scale(1.02);
+  box-shadow:0 0 10px rgba(107,15,26,0.4);
+}
 
 /* ADMIN */
 #adminPanel{display:none;}
@@ -84,28 +93,28 @@ button{
 </select>
 
 <h4>Lixo na sala</h4>
-<div class="opcao ok" onclick="lixo=2">Excelente (+2)</div>
-<div class="opcao mid" onclick="lixo=0">Regular (0)</div>
-<div class="opcao bad" onclick="lixo=-2">Ruim (-2)</div>
+<div class="opcao ok lixo" onclick="setLixo(2,this)">Excelente (+2)</div>
+<div class="opcao mid lixo" onclick="setLixo(0,this)">Regular (0)</div>
+<div class="opcao bad lixo" onclick="setLixo(-2,this)">Ruim (-2)</div>
 
 <h4>Carteiras organizadas</h4>
-<div class="opcao ok" onclick="carteiras=3">Excelente (+3)</div>
-<div class="opcao mid" onclick="carteiras=0">Regular (0)</div>
+<div class="opcao ok car" onclick="setCar(3,this)">Excelente (+3)</div>
+<div class="opcao mid car" onclick="setCar(0,this)">Regular (0)</div>
 
 <button onclick="salvar()">Salvar Avaliação</button>
 </div>
 
-<!-- ADMIN LOGIN -->
+<!-- LOGIN ADMIN -->
 <div class="card">
 <h3>Acesso Administrador</h3>
-<input type="password" id="senha" placeholder="Senha">
+<input type="password" id="senha" placeholder="Senha 2312">
 <button onclick="login()">Entrar</button>
 </div>
 
-<!-- ADMIN PANEL -->
+<!-- ADMIN -->
 <div class="card" id="adminPanel">
 <h3>Painel Admin</h3>
-<button onclick="relatorio()">Ver Relatório Geral</button>
+<button onclick="relatorio()">Ver Relatório</button>
 <div id="resultado"></div>
 </div>
 
@@ -115,7 +124,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, collection, addDoc, getDocs } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔴 COLOQUE SEU CONFIG DO FIREBASE AQUI */
+/* 🔴 COLOQUE SEU FIREBASE AQUI */
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",
   authDomain: "SEU_AUTH",
@@ -128,13 +137,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* VARIÁVEIS */
 let lixo = 0;
-let carteiras = 0;
+let car = 0;
 
-/* SALVAR NO BANCO */
+/* SETAR OPÇÕES */
+window.setLixo = function(valor, el){
+  lixo = valor;
+  document.querySelectorAll(".lixo").forEach(e=>e.classList.remove("selecionado"));
+  el.classList.add("selecionado");
+}
+
+window.setCar = function(valor, el){
+  car = valor;
+  document.querySelectorAll(".car").forEach(e=>e.classList.remove("selecionado"));
+  el.classList.add("selecionado");
+}
+
+/* SALVAR */
 window.salvar = async function(){
-
-  let total = lixo + carteiras;
+  let total = lixo + car;
 
   await addDoc(collection(db,"avaliacoes"),{
     turma: document.getElementById("turma").value,
@@ -142,14 +164,14 @@ window.salvar = async function(){
     data: new Date()
   });
 
-  alert("Avaliação salva na nuvem!");
+  alert("Salvo na nuvem!");
 }
 
-/* LOGIN ADMIN */
+/* LOGIN */
 window.login = function(){
-  let senha = document.getElementById("senha").value;
+  let s = document.getElementById("senha").value;
 
-  if(senha === "2312"){
+  if(s === "2312"){
     document.getElementById("adminPanel").style.display="block";
   } else {
     alert("Senha incorreta!");
@@ -158,17 +180,15 @@ window.login = function(){
 
 /* RELATÓRIO */
 window.relatorio = async function(){
-
   let snap = await getDocs(collection(db,"avaliacoes"));
 
   let total = 0;
   let porTurma = {};
 
-  snap.forEach(doc=>{
-    let d = doc.data();
-
-    total += d.pontos;
-    porTurma[d.turma] = (porTurma[d.turma] || 0) + d.pontos;
+  snap.forEach(d=>{
+    let data = d.data();
+    total += data.pontos;
+    porTurma[data.turma] = (porTurma[data.turma] || 0) + data.pontos;
   });
 
   let html = `<h4>Total geral: ${total}</h4>`;
@@ -184,37 +204,3 @@ window.relatorio = async function(){
 
 </body>
 </html>
-
-
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyA2Aj3DwnFaeocfR8M37epOjGkw4kecOlA",
-  authDomain: "cda-avaliacoescolar.firebaseapp.com",
-  projectId: "cda-avaliacoescolar",
-  storageBucket: "cda-avaliacoescolar.firebasestorage.app",
-  messagingSenderId: "1083707338281",
-  appId: "1:1083707338281:web:8cff2ae3a2bb6d743d7638",
-  measurementId: "G-X1XL8JY18L"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-npm install -g firebase-tools
-firebase init
-firebase deploy --only hosting:cda-avaliacoescolar-47f74
-{
-  "hosting": {
-    "site": "cda-avaliacoescolar-47f74",
-
-    "public": "public",
-    ...
-  }
-}
