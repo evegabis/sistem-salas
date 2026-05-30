@@ -30,6 +30,12 @@ header h2{margin:5px 0;font-size:14px;}
   box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
+input, select{
+  width:100%;
+  padding:8px;
+  margin:6px 0;
+}
+
 .opcao{
   padding:10px;
   margin:5px 0;
@@ -37,7 +43,6 @@ header h2{margin:5px 0;font-size:14px;}
   text-align:center;
   cursor:pointer;
   font-weight:bold;
-  transition:0.2s;
 }
 
 .ok{background:#c8f7c5;}
@@ -46,7 +51,6 @@ header h2{margin:5px 0;font-size:14px;}
 
 .selecionado{
   border:3px solid #6b0f1a;
-  transform:scale(1.03);
 }
 
 button{
@@ -59,7 +63,11 @@ button{
 }
 
 #admin{display:none;}
-.erro{color:red;font-size:13px;}
+
+.erro{
+  color:red;
+  font-size:13px;
+}
 </style>
 </head>
 
@@ -72,7 +80,12 @@ button{
 
 <div class="card">
 
-<h3>Turma</h3>
+<h3>Avaliação</h3>
+
+<!-- 👇 NOME -->
+<input type="text" id="nome" placeholder="Seu nome">
+
+<!-- TURMA -->
 <select id="turma">
 <option>6A</option><option>6B</option><option>6C</option><option>6D</option>
 <option>7A</option><option>7B</option><option>7C</option><option>7D</option>
@@ -83,30 +96,23 @@ button{
 <option>3A</option><option>3B</option><option>3C</option>
 </select>
 
-  <div class="card">
+<h4>Lixo</h4>
+<div class="opcao lixo ok" onclick="set('lixo',2,this)">Excelente (+2)</div>
+<div class="opcao lixo mid" onclick="set('lixo',1,this)">Bom (+1)</div>
+<div class="opcao lixo mid" onclick="set('lixo',0,this)">Regular (0)</div>
+<div class="opcao lixo bad" onclick="set('lixo',-2,this)">Ruim (-2)</div>
 
-<h3>Avaliação da Sala</h3>
+<h4>Carteiras</h4>
+<div class="opcao car ok" onclick="set('car',3,this)">Excelente (+3)</div>
+<div class="opcao car mid" onclick="set('car',1,this)">Bom (+1)</div>
+<div class="opcao car mid" onclick="set('car',0,this)">Regular (0)</div>
+<div class="opcao car bad" onclick="set('car',-2,this)">Ruim (-2)</div>
 
-<input type="text" id="nome" placeholder="Seu nome">
-
-<select id="turma">
-<h3>Lixo</h3>
-<div class="opcao ok lixo" onclick="set('lixo',2,this)">Excelente (+2)</div>
-<div class="opcao mid lixo" onclick="set('lixo',1,this)">Bom (+1)</div>
-<div class="opcao mid lixo" onclick="set('lixo',0,this)">Regular (0)</div>
-<div class="opcao bad lixo" onclick="set('lixo',-2,this)">Ruim (-2)</div>
-
-<h3>Carteiras</h3>
-<div class="opcao ok car" onclick="set('car',3,this)">Excelente (+3)</div>
-<div class="opcao mid car" onclick="set('car',1,this)">Bom (+1)</div>
-<div class="opcao mid car" onclick="set('car',0,this)">Regular (0)</div>
-<div class="opcao bad car" onclick="set('car',-2,this)">Ruim (-2)</div>
-
-<h3>Paredes</h3>
-<div class="opcao ok wall" onclick="set('wall',2,this)">Excelente (+2)</div>
-<div class="opcao mid wall" onclick="set('wall',1,this)">Bom (+1)</div>
-<div class="opcao mid wall" onclick="set('wall',0,this)">Regular (0)</div>
-<div class="opcao bad wall" onclick="set('wall',-2,this)">Ruim (-2)</div>
+<h4>Paredes</h4>
+<div class="opcao wall ok" onclick="set('wall',2,this)">Excelente (+2)</div>
+<div class="opcao wall mid" onclick="set('wall',1,this)">Bom (+1)</div>
+<div class="opcao wall mid" onclick="set('wall',0,this)">Regular (0)</div>
+<div class="opcao wall bad" onclick="set('wall',-2,this)">Ruim (-2)</div>
 
 <button onclick="salvar()">Salvar</button>
 <p id="msg" class="erro"></p>
@@ -135,7 +141,7 @@ let estado = {
 };
 
 function set(tipo, valor, el){
-  estado[tipo] = valor;
+  estado[tipo]=valor;
 
   document.querySelectorAll("."+tipo).forEach(e=>{
     e.classList.remove("selecionado");
@@ -145,9 +151,12 @@ function set(tipo, valor, el){
 }
 
 function salvar(){
-  let msg = document.getElementById("msg");
+  let msg=document.getElementById("msg");
 
-  if(estado.lixo===null || estado.car===null || estado.wall===null){
+  let nome=document.getElementById("nome").value;
+  let turma=document.getElementById("turma").value;
+
+  if(!nome || estado.lixo===null || estado.car===null || estado.wall===null){
     msg.innerText="Preencha tudo antes de salvar!";
     return;
   }
@@ -157,14 +166,15 @@ function salvar(){
   let total = estado.lixo + estado.car + estado.wall;
 
   dados.push({
-    turma: document.getElementById("turma").value,
-    pontos: total,
-    data: new Date().toLocaleString()
+    nome:nome,
+    turma:turma,
+    pontos:total,
+    data:new Date().toLocaleString()
   });
 
-  localStorage.setItem("dados", JSON.stringify(dados));
+  localStorage.setItem("dados",JSON.stringify(dados));
 
-  alert("Salvo!");
+  alert("Salvo com sucesso!");
 }
 
 function login(){
@@ -176,20 +186,21 @@ function login(){
 }
 
 function ver(){
-  let total = 0;
-  let porTurma = {};
+  let total=0;
+  let porTurma={};
 
   dados.forEach(d=>{
-    total += d.pontos;
-    porTurma[d.turma] = (porTurma[d.turma]||0)+d.pontos;
+    total+=d.pontos;
+    porTurma[d.turma]=(porTurma[d.turma]||0)+d.pontos;
   });
 
-  let html = `<p>Total: ${total}</p>`;
+  let html=`<p>Total geral: ${total}</p>`;
 
   for(let t in porTurma){
-    html += `<p>${t} → ${porTurma[t]}</p>`;
+    html+=`<p>${t} → ${porTurma[t]}</p>`;
   }
 
+  document.getElementById("res").innerHTML=html;
 }
 </script>
 
