@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar</title>
+<title>Sistema Escolar 2.0</title>
 
 <style>
 body{
@@ -21,7 +21,7 @@ header{
 }
 
 header h1{margin:0;font-size:20px;}
-header h2{margin:5px 0;font-size:16px;}
+header h2{margin:5px 0;font-size:15px;}
 header p{margin:0;font-size:13px;opacity:0.9;}
 
 /* CARD */
@@ -58,7 +58,7 @@ button{
 .mid{background:#eee;}
 .bad{background:#f8c6c6;}
 
-/* SELECIONADO */
+/* SELEÇÃO */
 .selecionado{
   border:3px solid #6b0f1a;
   transform:scale(1.02);
@@ -73,14 +73,14 @@ button{
 <body>
 
 <header>
-<h1>Colégio Arlinda Ferreira Creplive</h1>
-<h2>Projeto Clube das Meninas</h2>
-<p>Sistema de Avaliação Escolar</p>
+<h1>Colégio Arlinda Ferreira Crepini</h1>
+<h2>Projeto Meninas Clube das Meninas</h2>
+<p>Sistema de Avaliação Escolar 2.0</p>
 </header>
 
 <!-- AVALIAÇÃO -->
 <div class="card">
-<h3>Avaliação Diária</h3>
+<h3>Avaliação da Sala</h3>
 
 <select id="turma">
   <option>6A</option><option>6B</option><option>6C</option><option>6D</option>
@@ -100,15 +100,11 @@ button{
 <h4>Carteiras organizadas</h4>
 <div class="opcao ok car" onclick="setCar(3,this)">Excelente (+3)</div>
 <div class="opcao mid car" onclick="setCar(0,this)">Regular (0)</div>
-<div class="opcao bad car" onclick="setLixo(-2,this)">Ruim (-2)</div>
 
 <h4>Paredes da sala</h4>
-
-<div class="opcao ok paredes" onclick="setParedes(2,this)">Excelente (sem marcas) +2</div>
-<div class="opcao mid paredes" onclick="setParedes(1,this)">Boa (pequenas marcas) +1</div>
-<div class="opcao mid paredes" onclick="setParedes(0,this)">Regular (algumas sujeiras) 0</div>
-<div class="opcao bad paredes" onclick="setParedes(-2,this)">Ruim (muito suja) -2</div>
-
+<div class="opcao ok wall" onclick="setWall(2,this)">Excelente (+2)</div>
+<div class="opcao mid wall" onclick="setWall(0,this)">Regular (0)</div>
+<div class="opcao bad wall" onclick="setWall(-2,this)">Ruim (-2)</div>
 
 <button onclick="salvar()">Salvar Avaliação</button>
 </div>
@@ -116,14 +112,14 @@ button{
 <!-- LOGIN ADMIN -->
 <div class="card">
 <h3>Acesso Administrador</h3>
-<input type="password" id="senha" placeholder="Senha">
+<input type="password" id="senha" placeholder="Senha 2312">
 <button onclick="login()">Entrar</button>
 </div>
 
 <!-- ADMIN -->
 <div class="card" id="adminPanel">
 <h3>Painel Admin</h3>
-<button onclick="relatorio()">Ver Relatório</button>
+<button onclick="relatorio()">Ver Relatório Geral</button>
 <div id="resultado"></div>
 </div>
 
@@ -133,7 +129,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, collection, addDoc, getDocs } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔴 COLOQUE SEU FIREBASE AQUI */
+/* 🔴 SEU FIREBASE AQUI */
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",
   authDomain: "SEU_AUTH",
@@ -149,23 +145,30 @@ const db = getFirestore(app);
 /* VARIÁVEIS */
 let lixo = 0;
 let car = 0;
+let wall = 0;
 
-/* SETAR OPÇÕES */
-window.setLixo = function(valor, el){
-  lixo = valor;
+/* SETS */
+window.setLixo = function(v,el){
+  lixo = v;
   document.querySelectorAll(".lixo").forEach(e=>e.classList.remove("selecionado"));
   el.classList.add("selecionado");
 }
 
-window.setCar = function(valor, el){
-  car = valor;
+window.setCar = function(v,el){
+  car = v;
   document.querySelectorAll(".car").forEach(e=>e.classList.remove("selecionado"));
+  el.classList.add("selecionado");
+}
+
+window.setWall = function(v,el){
+  wall = v;
+  document.querySelectorAll(".wall").forEach(e=>e.classList.remove("selecionado"));
   el.classList.add("selecionado");
 }
 
 /* SALVAR */
 window.salvar = async function(){
-  let total = lixo + car;
+  let total = lixo + car + wall;
 
   await addDoc(collection(db,"avaliacoes"),{
     turma: document.getElementById("turma").value,
@@ -173,14 +176,13 @@ window.salvar = async function(){
     data: new Date()
   });
 
-  alert("Salvo na nuvem!");
+  alert("Avaliação salva na nuvem!");
 }
 
 /* LOGIN */
 window.login = function(){
   let s = document.getElementById("senha").value;
-
-  if(s === "2312"){
+  if(s==="2312"){
     document.getElementById("adminPanel").style.display="block";
   } else {
     alert("Senha incorreta!");
@@ -197,7 +199,7 @@ window.relatorio = async function(){
   snap.forEach(d=>{
     let data = d.data();
     total += data.pontos;
-    porTurma[data.turma] = (porTurma[data.turma] || 0) + data.pontos;
+    porTurma[data.turma]=(porTurma[data.turma]||0)+data.pontos;
   });
 
   let html = `<h4>Total geral: ${total}</h4>`;
@@ -208,7 +210,6 @@ window.relatorio = async function(){
 
   document.getElementById("resultado").innerHTML = html;
 }
-
 </script>
 
 </body>
