@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar 2.0</title>
+<title>Sistema Escolar 4.1</title>
 
 <style>
 body{
@@ -12,12 +12,12 @@ body{
   background:#f2f2f2;
 }
 
-/* CABEÇALHO */
+/* HEADER */
 header{
   background:linear-gradient(135deg,#6b0f1a,#3a3a3a);
   color:white;
   text-align:center;
-  padding:20px;
+  padding:22px;
 }
 
 header h1{margin:0;font-size:20px;}
@@ -61,25 +61,31 @@ button{
 /* SELEÇÃO */
 .selecionado{
   border:3px solid #6b0f1a;
-  transform:scale(1.02);
-  box-shadow:0 0 10px rgba(107,15,26,0.4);
+  transform:scale(1.03);
+  box-shadow:0 0 12px rgba(107,15,26,0.5);
 }
 
 /* ADMIN */
 #adminPanel{display:none;}
+
+.erro{
+  color:red;
+  font-size:13px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>Colégio Arlinda Ferreira Creplive</h1>
-<h2>Projeto do Clube das Meninas</h2>
+<h1>Colégio Estadual Arlina Ferreira Crepive</h1>
+<h2>Projeto Clube das Meninas</h2>
 <p>Sistema de Avaliação Escolar</p>
 </header>
 
 <!-- AVALIAÇÃO -->
 <div class="card">
+
 <h3>Avaliação da Sala</h3>
 
 <select id="turma">
@@ -92,35 +98,39 @@ button{
   <option>3A</option><option>3B</option><option>3C</option>
 </select>
 
-<h4>Lixo na sala</h4>
+<h4>Lixo</h4>
 <div class="opcao ok lixo" onclick="setLixo(2,this)">Excelente (+2)</div>
 <div class="opcao mid lixo" onclick="setLixo(0,this)">Regular (0)</div>
 <div class="opcao bad lixo" onclick="setLixo(-2,this)">Ruim (-2)</div>
 
-<h4>Carteiras organizadas</h4>
+<h4>Carteiras</h4>
 <div class="opcao ok car" onclick="setCar(3,this)">Excelente (+3)</div>
+<div class="opcao mid car" onclick="setCar(1,this)">Boa (+1)</div>
 <div class="opcao mid car" onclick="setCar(0,this)">Regular (0)</div>
-<div class="opcao bad car" onclick="setLixo(-2,this)">Ruim (-2)</div>
+<div class="opcao bad car" onclick="setCar(-2,this)">Ruim (-2)</div>
 
-<h4>Paredes da sala</h4>
+<h4>Paredes</h4>
 <div class="opcao ok wall" onclick="setWall(2,this)">Excelente (+2)</div>
 <div class="opcao mid wall" onclick="setWall(0,this)">Regular (0)</div>
 <div class="opcao bad wall" onclick="setWall(-2,this)">Ruim (-2)</div>
 
 <button onclick="salvar()">Salvar Avaliação</button>
+
+<p id="msg" class="erro"></p>
+
 </div>
 
-<!-- LOGIN ADMIN -->
+<!-- LOGIN -->
 <div class="card">
-<h3>Acesso Administrador</h3>
-<input type="password" id="senha" placeholder="Senha">
+<h3>Administrador</h3>
+<input type="password" id="senha" placeholder="Senha 2312">
 <button onclick="login()">Entrar</button>
 </div>
 
 <!-- ADMIN -->
 <div class="card" id="adminPanel">
 <h3>Painel Admin</h3>
-<button onclick="relatorio()">Ver Relatório Geral</button>
+<button onclick="relatorio()">Ver Relatório</button>
 <div id="resultado"></div>
 </div>
 
@@ -130,7 +140,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, collection, addDoc, getDocs } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔴 SEU FIREBASE AQUI */
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",
   authDomain: "SEU_AUTH",
@@ -144,31 +153,41 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /* VARIÁVEIS */
-let lixo = 0;
-let car = 0;
-let wall = 0;
+let lixo = null;
+let car = null;
+let wall = null;
 
-/* SETS */
+/* FUNÇÕES */
 window.setLixo = function(v,el){
-  lixo = v;
+  lixo=v;
   document.querySelectorAll(".lixo").forEach(e=>e.classList.remove("selecionado"));
   el.classList.add("selecionado");
 }
 
 window.setCar = function(v,el){
-  car = v;
+  car=v;
   document.querySelectorAll(".car").forEach(e=>e.classList.remove("selecionado"));
   el.classList.add("selecionado");
 }
 
 window.setWall = function(v,el){
-  wall = v;
+  wall=v;
   document.querySelectorAll(".wall").forEach(e=>e.classList.remove("selecionado"));
   el.classList.add("selecionado");
 }
 
 /* SALVAR */
 window.salvar = async function(){
+
+  let msg = document.getElementById("msg");
+
+  if(lixo===null || car===null || wall===null){
+    msg.innerText="Selecione todas as opções antes de salvar!";
+    return;
+  }
+
+  msg.innerText="";
+
   let total = lixo + car + wall;
 
   await addDoc(collection(db,"avaliacoes"),{
@@ -177,40 +196,43 @@ window.salvar = async function(){
     data: new Date()
   });
 
-  alert("Avaliação salva na nuvem!");
+  alert("Avaliação salva com sucesso!");
 }
 
 /* LOGIN */
 window.login = function(){
-  let s = document.getElementById("senha").value;
-  if(s==="2312"){
+  let senha = document.getElementById("senha").value;
+
+  if(senha === "2312"){
     document.getElementById("adminPanel").style.display="block";
   } else {
-    alert("Senha incorreta!");
+    alert("Senha incorreta");
   }
 }
 
 /* RELATÓRIO */
 window.relatorio = async function(){
+
   let snap = await getDocs(collection(db,"avaliacoes"));
 
-  let total = 0;
-  let porTurma = {};
+  let total=0;
+  let porTurma={};
 
   snap.forEach(d=>{
-    let data = d.data();
+    let data=d.data();
     total += data.pontos;
     porTurma[data.turma]=(porTurma[data.turma]||0)+data.pontos;
   });
 
-  let html = `<h4>Total geral: ${total}</h4>`;
+  let html=`<h4>Total geral: ${total}</h4>`;
 
   for(let t in porTurma){
-    html += `<p>${t} → ${porTurma[t]} pontos</p>`;
+    html+=`<p>${t} → ${porTurma[t]} pontos</p>`;
   }
 
-  document.getElementById("resultado").innerHTML = html;
+  document.getElementById("resultado").innerHTML=html;
 }
+
 </script>
 
 </body>
