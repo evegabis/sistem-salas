@@ -150,7 +150,8 @@ function set(tipo, valor, el){
   el.classList.add("selecionado");
 }
 
-function salvar(){
+async function salvar(){
+
   let msg=document.getElementById("msg");
 
   let nome=document.getElementById("nome").value;
@@ -161,20 +162,47 @@ function salvar(){
     return;
   }
 
-  msg.innerText="";
-
   let total = estado.lixo + estado.car + estado.wall;
 
-  dados.push({
-    nome:nome,
-    turma:turma,
-    pontos:total,
-    data:new Date().toLocaleString()
-  });
+  msg.style.color="black";
+  msg.innerText="Enviando...";
 
-  localStorage.setItem("dados",JSON.stringify(dados));
+  try{
 
-  alert("Salvo com sucesso!");
+    await fetch("https://script.google.com/macros/s/AKfycbz086n-i3mz2D2ukOCfixB7APnxW9IMlY_pzj3GGJmUkFnE-YAqR4BqhykUY7hFNeMZNg/exec",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        nome:nome,
+        turma:turma,
+        pontos:total
+      })
+    });
+
+    msg.style.color="green";
+    msg.innerText="Avaliação enviada com sucesso!";
+
+    document.getElementById("nome").value="";
+
+    estado={
+      lixo:null,
+      car:null,
+      wall:null
+    };
+
+    document.querySelectorAll(".opcao").forEach(e=>{
+      e.classList.remove("selecionado");
+    });
+
+  }catch(err){
+
+    msg.style.color="red";
+    msg.innerText="Erro ao enviar.";
+
+  }
+
 }
 
 function login(){
