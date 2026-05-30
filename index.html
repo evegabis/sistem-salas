@@ -73,8 +73,8 @@ button{
 <body>
 
 <header>
-<h1>Colégio Arlinda Ferreira Crepini</h1>
-<h2>Projeto Meninas Clube das Meninas</h2>
+<h1>Colégio Arlinda Ferreira Creplive</h1>
+<h2>Projeto Clube das Meninas</h2>
 <p>Sistema de Avaliação Escolar</p>
 </header>
 
@@ -100,6 +100,15 @@ button{
 <h4>Carteiras organizadas</h4>
 <div class="opcao ok car" onclick="setCar(3,this)">Excelente (+3)</div>
 <div class="opcao mid car" onclick="setCar(0,this)">Regular (0)</div>
+<div class="opcao bad car" onclick="setLixo(-2,this)">Ruim (-2)</div>
+
+<h4>Paredes da sala</h4>
+
+<div class="opcao ok paredes" onclick="setParedes(2,this)">Excelente (sem marcas) +2</div>
+<div class="opcao mid paredes" onclick="setParedes(1,this)">Boa (pequenas marcas) +1</div>
+<div class="opcao mid paredes" onclick="setParedes(0,this)">Regular (algumas sujeiras) 0</div>
+<div class="opcao bad paredes" onclick="setParedes(-2,this)">Ruim (muito suja) -2</div>
+
 
 <button onclick="salvar()">Salvar Avaliação</button>
 </div>
