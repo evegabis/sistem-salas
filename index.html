@@ -98,10 +98,12 @@ button{
   <option>3A</option><option>3B</option><option>3C</option>
 </select>
 
-<h4>Lixo</h4>
-<div class="opcao ok lixo" onclick="setLixo(2,this)">Excelente (+2)</div>
-<div class="opcao mid lixo" onclick="setLixo(0,this)">Regular (0)</div>
-<div class="opcao bad lixo" onclick="setLixo(-2,this)">Ruim (-2)</div>
+<h4>lixo</h4>
+
+<div class="opcao ok  lixo" onclick="setCar(3,this)">Excelente (+3)</div>
+<div class="opcao mid lixo" onclick="setCar(1,this)">Boa (+1)</div>
+<div class="opcao mid lixo" onclick="setCar(0,this)">Regular (0)</div>
+<div class="opcao bad lixo" onclick="setCar(-2,this)">Ruim (-2)</div>
 
 <h4>Carteiras</h4>
 <div class="opcao ok car" onclick="setCar(3,this)">Excelente (+3)</div>
@@ -123,7 +125,7 @@ button{
 <!-- LOGIN -->
 <div class="card">
 <h3>Administrador</h3>
-<input type="password" id="senha" placeholder="Senha 2312">
+<input type="password" id="senha" placeholder="Senha">
 <button onclick="login()">Entrar</button>
 </div>
 
